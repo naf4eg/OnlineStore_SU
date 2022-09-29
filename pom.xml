@@ -7,14 +7,17 @@
     <groupId>ru.bachev.store</groupId>
     <artifactId>OnlineStore_SU</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>OnlineStore_SU</name>
+    <packaging>war</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
 
         <lombok.version>1.18.24</lombok.version>
-        <logback-classic.version>1.4.1</logback-classic.version>
+        <logback-classic.version>1.2.11</logback-classic.version>
         <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
         <tomcat-jdbc.version>10.0.23</tomcat-jdbc.version>
         <h2.version>2.1.214</h2.version>
@@ -22,6 +25,28 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+        </dependency>
+        <!--    на томкате 10 использовать эти 2 зависимости, 1.2 не работает, по крайней мере я не смог запустить    -->
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>${jakarta.servlet.jsp.jstl-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>${jakarta.servlet.jsp.jstl-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -32,6 +57,10 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback-classic.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-jdbc</artifactId>
+            <version>${tomcat-jdbc.version}</version>
+        </dependency>
     </dependencies>
-    
 </project>
