@@ -1,9 +1,7 @@
 package dao;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,47 +10,37 @@ import model.Product;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
-/**
- * Repository service
- */
 @Slf4j
 public class RepositoryService {
 
-    private static final DataSource dataSource = createDataSourceWithPoolConnect();
+    private static final DataSource dataSource = createDataSource();
 
     public static Optional<List<Product>> findProducts() {
-        log.info("в коннекшене");
-        Connection con = null;
+        log.info("===>> find products from db");
         List<Product> products = new ArrayList<>();
-        try {
-            con = dataSource.getConnection();
-            Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("select * from PRODUCTS");
-            while (rs.next()) {
-                String id = rs.getString("ID");
-                String name = rs.getString("NAME");
-                String desc = rs.getString("DESC");
-                products.add(new Product(id, name, desc));
+        try (var connection = dataSource.getConnection()) {
+            try (var statement = connection.createStatement()) {
+                try (var resultSet = statement.executeQuery("SELECT ID, NAME, DESC FROM PRODUCTS")) {
+                    while (resultSet.next()) {
+                        products.add(createProductByResultSet(resultSet));
+                    }
+                }
             }
-            rs.close();
-            st.close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } finally {
-            if (con != null) try {
-                con.close();
-            } catch (Exception ignore) {
-            }
+        } catch (SQLException exc) {
+            exc.printStackTrace();
         }
 
-        if (products.isEmpty()) {
-            return Optional.empty();
-        } else {
-            return Optional.of(products);
-        }
+        return products.isEmpty() ? Optional.empty() : Optional.of(products);
     }
 
-    private static DataSource createDataSourceWithPoolConnect() {
+    private static Product createProductByResultSet(ResultSet resultSet) throws SQLException {
+        var id = resultSet.getString("ID");
+        var name = resultSet.getString("NAME");
+        var desc = resultSet.getString("DESC");
+        return new Product(id, name, desc);
+    }
+
+    private static DataSource createDataSource() {
         PoolProperties p = new PoolProperties();
         p.setUrl("jdbc:h2:~/test");
         p.setDriverClassName("org.h2.Driver");

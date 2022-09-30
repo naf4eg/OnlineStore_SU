@@ -7,6 +7,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +16,7 @@ import org.slf4j.MDC;
 
 @Slf4j
 @WebFilter(
-        filterName = "MainFilter",
+        filterName = "mainFilter",
         urlPatterns = {"/*"}
 )
 public class MainFilter implements Filter {
@@ -29,8 +30,9 @@ public class MainFilter implements Filter {
             initSession(request);
             chain.doFilter(request, response);
         } catch (IOException | ServletException e) {
-            log.error("Filter error", e);
+            log.error("Error", e);
             MDC.remove(SESSION_ID);
+            throw new RuntimeException("Ошибка сервиса");
         }
     }
 
@@ -38,7 +40,7 @@ public class MainFilter implements Filter {
         var session = ((HttpServletRequest) request).getSession(true);
         if (session.isNew()) {
             session.setMaxInactiveInterval(60);
-            setSessionIdInMDCLoggerById(session.getId());
+            setSessionIdInMDCLoggerBySessionId(session.getId());
             log.info("Session is new");
         } else {
             var cookies = Arrays.asList(((HttpServletRequest) request).getCookies());
@@ -55,7 +57,7 @@ public class MainFilter implements Filter {
                 .ifPresent(s -> MDC.put(SESSION_ID, s));
     }
 
-    private void setSessionIdInMDCLoggerById(String sessionId) {
+    private void setSessionIdInMDCLoggerBySessionId(String sessionId) {
         MDC.put(SESSION_ID, sessionId);
     }
 }
